@@ -1,7 +1,0 @@
-{
-  "_comment": "Optional. Copy to settings.json (same dir) or ~/.flame_time_logger/settings.json, or point $FLAME_TIME_LOGGER_CONFIG at it. Auth is NOT configured here - it comes from the live ShotGrid Toolkit session.",
-  "site": "https://your-studio.shotgrid.autodesk.com",
-  "project_map": {
-    "FlameProjectName": "FPT Project Name"
-  }
-}

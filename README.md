@@ -8,12 +8,15 @@ track time spent on a shot with a live stopwatch and log it as a **TimeLog** in
   Log Time…** (the action is hidden for plain clips).
 - **Auth:** reuses the live ShotGrid Toolkit session (`sgtk.get_authenticated_user()`),
   so there is no password prompt. The TimeLog is attributed to that user.
+- **Project:** taken straight from the running tk-flame engine context
+  (`sgtk.platform.current_engine().context.project`) — the authoritative FPT project for
+  the session, with no name matching against the Flame project.
 - **Capture:** live Start / Pause / Stop stopwatch; duration auto-fills but is editable.
 - **Rounding:** the logged duration is rounded to the **nearest 15 minutes**, shown
   live as *"Will log: N min"* before you submit.
 - **Link target:** the TimeLog `entity` is a **Task** on the resolved Shot.
-- **Shot matching:** exact match of the batch-group name to `Shot.code`; otherwise pick
-  from a searchable Shot dropdown.
+- **Shot matching:** exact match of the batch-group name to `Shot.code` within the
+  session project; otherwise pick from a searchable Shot dropdown.
 
 ## Layout
 
@@ -23,10 +26,8 @@ flame_time_logger/                the app package
   app.py            launch_dialog(): reuse QApplication, keep dialog alive
   dialog.py         TimeLogDialog: stopwatch + form, async ShotGrid I/O
   stopwatch.py      Stopwatch + round_to_quarter_hour (pure logic)
-  fpt.py            FPTClient: sgtk auth, shot/task lookups, create TimeLog
-  flame_context.py  reads project + batch-group names from the Flame selection
-  config.py         optional site URL + Flame→FPT project-name map
-config/settings.example.json
+  fpt.py            FPTClient: sgtk auth, engine-context project, lookups, TimeLog
+  flame_context.py  reads batch-group names from the Flame selection
 tools/smoke_dialog.py             standalone UI run against a fake client
 tests/test_stopwatch.py
 ```
@@ -41,20 +42,8 @@ tests/test_stopwatch.py
 3. Launch Flame **through the ShotGrid/Flow integration** so a `sgtk` session exists.
 4. Restart Flame (or reload Python hooks). Right-click a batch group to find the action.
 
-## Configuration (optional)
-
-Auth needs no config. To customise, copy `config/settings.example.json` to
-`config/settings.json` (or `~/.flame_time_logger/settings.json`, or point
-`$FLAME_TIME_LOGGER_CONFIG` at a file):
-
-```json
-{
-  "site": "https://your-studio.shotgrid.autodesk.com",
-  "project_map": { "FlameProjectName": "FPT Project Name" }
-}
-```
-
-`project_map` only matters when the Flame project name differs from the FPT project name.
+There is nothing to configure — auth, user, and project all come from the live tk-flame
+ShotGrid Toolkit session.
 
 ## Development & verification
 

@@ -170,18 +170,9 @@ class TimeLogDialog(QtWidgets.QDialog):
         self._pool.start(worker)
 
     def _load_initial(self) -> dict:
-        """Connect, resolve project, auto-match shot, and list shots/tasks."""
+        """Connect, read the session project, auto-match shot, list shots/tasks."""
         client = self._client_factory()
-        from .config import load_config
-
-        cfg = load_config()
-        project_name = cfg.fpt_project_name(self._context.project_name)
-        project = client.resolve_project(project_name)
-        if project is None:
-            raise RuntimeError(
-                f"Could not resolve FPT project for '{self._context.project_name}'."
-            )
-
+        project = client.current_project()
         shots = client.list_shots(project)
         matched = client.find_shot(project, self._context.primary_shot_name)
         tasks = client.list_tasks(matched) if matched else []

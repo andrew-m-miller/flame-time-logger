@@ -46,7 +46,7 @@ class FakeFPTClient:
     def current_user(self):
         return {"type": "HumanUser", "id": 5, "name": "Demo Artist"}
 
-    def resolve_project(self, name):
+    def current_project(self):
         return self._project
 
     def find_shot(self, project, code):
@@ -79,7 +79,7 @@ def main():
     from PySide6 import QtWidgets
 
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(sys.argv)
-    context = Context(project_name="Demo", shot_names=["SHOT_0010"])
+    context = Context(shot_names=["SHOT_0010"])
     dialog = launch_dialog(context, client_factory=FakeFPTClient)
     dialog.exec()  # block in standalone mode
 

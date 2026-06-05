@@ -39,11 +39,17 @@ class FPTClient:
     existing ``sg`` connection and ``current_user`` entity for testing.
     """
 
-    def __init__(self, sg: Any = None, current_user: Optional[Entity] = None) -> None:
+    def __init__(
+        self,
+        sg: Any = None,
+        current_user: Optional[Entity] = None,
+        project: Optional[Entity] = None,
+    ) -> None:
         if sg is None:
             sg, current_user = self._connect_from_toolkit()
         self._sg = sg
         self._current_user = current_user
+        self._project = project
 
     @staticmethod
     def _connect_from_toolkit() -> tuple[Any, Entity]:
@@ -78,16 +84,31 @@ class FPTClient:
 
     # -- lookups ---------------------------------------------------------
 
-    def resolve_project(self, name: Optional[str]) -> Optional[Entity]:
-        """Find a Project by ``name``, falling back to ``tank_name``."""
-        if not name:
-            return None
-        project = self._sg.find_one(
-            "Project", [["name", "is", name]], ["id", "name"]
-        )
-        if project is None:
-            project = self._sg.find_one(
-                "Project", [["tank_name", "is", name]], ["id", "name"]
+    def current_project(self) -> Entity:
+        """Project entity for the active sgtk session, from the engine context.
+
+        This is the authoritative FPT project (``{type, id, name}``) for the
+        running Flame integration -- no name matching against the Flame project
+        is needed. Cached after first read.
+        """
+        if self._project is None:
+            self._project = self._project_from_engine()
+        return self._project
+
+    @staticmethod
+    def _project_from_engine() -> Entity:
+        import sgtk  # noqa: PLC0415 -- bundled with Flame's integration
+
+        engine = sgtk.platform.current_engine()
+        if engine is None:
+            raise NotAuthenticated(
+                "No active ShotGrid Toolkit engine in this Flame session."
+            )
+        context = engine.context
+        project = context.project if context is not None else None
+        if not project:
+            raise FPTError(
+                "The current ShotGrid Toolkit context has no project."
             )
         return project
 
