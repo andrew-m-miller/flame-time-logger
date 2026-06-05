@@ -1,0 +1,5 @@
+# Dev/lint/standalone-smoke-test only. NOT installed into Flame --
+# Flame 2026 ships its own Python 3 with PySide6 and sgtk bundled.
+PySide6>=6.5
+shotgun_api3>=3.4
+pytest>=7.0
